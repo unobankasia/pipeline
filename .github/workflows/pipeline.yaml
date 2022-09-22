@@ -6,7 +6,14 @@ name: CI
 on:
   push:
   # Triggers the workflow on push or pull request events but only for the main branch
-  workflow_call:    
+  workflow_call:
+    inputs:
+      username:
+        required: true
+        type: string
+    secrets:
+      envPAT:
+        required: true
     
 env:
   ## Sets environment variable
