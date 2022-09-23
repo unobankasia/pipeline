@@ -27,6 +27,7 @@ env:
   CLUSTER: "custom-apps-dev"
   CLUSTER_PROD: "custom-apps-cluster"
   PLATFORM_REPO: "unobank-app-platform"
+  MAVEN: "/opt/apache-maven-3.8.4/bin/mvn"
     
   # Allows you to run this workflow manually from the Actions tab files
   # workflow_dispatch: 
@@ -57,7 +58,7 @@ jobs:
           echo "NAMESPACE=loans-${GITHUB_REF##*/}" >> $GITHUB_ENV
                
       - name: Maven Build  
-        run: /opt/apache-maven-3.8.4/bin/mvn clean package
+        run: ${{env.MAVEN}} clean package
 
       - name: SonarQube Scan
         if: env.BRANCH == 'sample' || env.BRANCH == 'dev'
