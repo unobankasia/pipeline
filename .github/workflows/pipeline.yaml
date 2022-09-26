@@ -10,17 +10,7 @@ on:
     
 env:
   ## Sets environment variable
-  MICROSERVICES: "loan-underwriting-service"
-  REGION: "ap-southeast-1"
-  ECR_URL: "683993062563.dkr.ecr.ap-southeast-1.amazonaws.com"
-  ECR_URL_PROD: "126655470253.dkr.ecr.ap-southeast-1.amazonaws.com"
-  ECR_REPO: "loan-underwriting-service"
-  ASSUME_ROLE: "arn:aws:iam::683993062563:role/cross-account-role-custom-apps"
-  ASSUME_ROLE_PROD: "arn:aws:iam::126655470253:role/cross-account-custom-apps-prod"
-  CLUSTER: "custom-apps-dev"
-  CLUSTER_PROD: "custom-apps-cluster"
-  PLATFORM_REPO: "unobank-app-platform"
-  MAVEN: "/opt/apache-maven-3.8.4/bin/mvn"
+
     
   # Allows you to run this workflow manually from the Actions tab files
   # workflow_dispatch: 
