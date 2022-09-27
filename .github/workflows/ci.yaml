@@ -13,9 +13,7 @@ on:
       ASSUME_ROLE_PROD:
         type: string         
       EXCLUDED_CLASS:
-        type: string        
-      ECR_REPO:
-        type: string        
+        type: string                
       PLATFORM_REPO:
         type: string        
       BUILD_PATH:
@@ -102,7 +100,7 @@ jobs:
         
       - name: Create ECR repository
         continue-on-error: true
-        run: aws ecr create-repository --repository-name ${{inputs.ECR_REPO}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
+        run: aws ecr create-repository --repository-name ${{inputs.MICROSERVICES}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
         
       - name: Build, tag, and push image to Amazon ECR
         env:          
