@@ -1,32 +1,40 @@
-# This is a basic workflow to help you get started with Actions trigger
+name: Template-CI
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  push:
   # Triggers the workflow on push or pull request events but only for the main branch
   workflow_call:
+    inputs:
+      REGION:
+        type: string        
+      MICROSERVICES:
+        type: string         
+      ASSUME_ROLE:
+        type: string         
+      ASSUME_ROLE_PROD:
+        type: string         
+      EXCLUDED_CLASS:
+        type: string        
+      ECR_REPO:
+        type: string        
+      PLATFORM_REPO:
+        type: string        
+      BUILD_PATH:
+        type: string      
     
-env:
+# env:
   ## Sets environment variable
-
-    
-  # Allows you to run this workflow manually from the Actions tab files
-  # workflow_dispatch: 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  CI:
     # The type of runner that the job will run on
     runs-on: self-hosted
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout loan-underwriting-service
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run scanner for the repository
         continue-on-error: true
@@ -38,24 +46,22 @@ jobs:
         run: |
           echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          echo "NAMESPACE=loans-${GITHUB_REF##*/}" >> $GITHUB_ENV
                
       - name: Maven Build  
-        run: ${{env.MAVEN}} clean package
+        run: /opt/apache-maven-3.8.4/bin/mvn clean package
+        working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
-        if: env.BRANCH == 'sample' || env.BRANCH == 'dev'
         uses: unobankasia/sonarqube-action@v1.1.9
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
           projectBaseDir: ./
-          projectKey: ${{env.MICROSERVICES}}
+          projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
-          exclusions: ${{env.EXCLUDED_CLASS}}
+          exclusions: ${{inputs.EXCLUDED_CLASS}}
       
       - name: SonarQube Quality Gate check
-        if: env.BRANCH == 'sample' || env.BRANCH == 'dev'
         continue-on-error: true
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
@@ -65,44 +71,48 @@ jobs:
          scanMetadataReportFile: .scannerwork/report-task.txt
       
       - name: Docker Build  
-        run: docker build -t $ECR_REPO:$IMAGE_TAG .
+        run: docker build -t ${{inputs.ECR_REPO}}:$IMAGE_TAG .
           
       - name: Configure AWS Credentials
         if: env.BRANCH != 'prod' 
         uses: aws-actions/configure-aws-credentials@v1
         with:
-         aws-region: ${{env.REGION}}
-         role-to-assume: ${{env.ASSUME_ROLE}}
-         role-duration-seconds: 1200
+         aws-region: ${{inputs.REGION}}
+         role-to-assume: ${{inputs.ASSUME_ROLE}}
+         role-duration-seconds: 3600
          role-skip-session-tagging: true
               
       - name: Configure AWS Credentials (PROD)
         if: env.BRANCH == 'prod'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-         aws-region: ${{env.REGION}}
-         role-to-assume: ${{env.ASSUME_ROLE_PROD}}
-         role-duration-seconds: 1200
+         aws-region: ${{inputs.REGION}}
+         role-to-assume: ${{inputs.ASSUME_ROLE_PROD}}
+         role-duration-seconds: 3600
          role-skip-session-tagging: true
           
       - name: Login to Amazon ECR 
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         
+      - name: Create ECR repository
+        continue-on-error: true
+        run: aws ecr create-repository --repository-name ${{inputs.ECR_REPO}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
+        
       - name: Build, tag, and push image to Amazon ECR
         env:          
           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag $ECR_REPO:$IMAGE_TAG $ECR_URL/$ECR_REPO:$IMAGE_TAG
-          docker push $ECR_URL/$ECR_REPO:$IMAGE_TAG
+          docker tag ${{inputs.ECR_REPO}}:$IMAGE_TAG $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
+          docker push $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
       
       - name: Update Image tag
         run: |
-          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{env.PLATFORM_REPO}}.git
-          cd ${{env.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{env.MICROSERVICES}}
+          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
+          cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
-          git commit -m "${{env.BRANCH}} | ${{env.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+          git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git checkout -b $IMAGE_TAG
           git push -u origin $IMAGE_TAG
           gh pr create --fill
@@ -110,6 +120,8 @@ jobs:
           gh pr merge -sd 
           
       - name: Vulnerabilities
+        env:          
+          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
         run: | 
-          sleep 30
-          aws ecr describe-image-scan-findings --repository-name $ECR_REPO --image-id imageTag=$IMAGE_TAG --region ap-southeast-1 | jq .imageScanFindings.findingSeverityCounts
+          sleep 10
+          trivy image $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
