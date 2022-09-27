@@ -74,7 +74,7 @@ jobs:
          scanMetadataReportFile: .scannerwork/report-task.txt
       
       - name: Docker Build  
-        run: docker build -t ${{inputs.ECR_REPO}}:$IMAGE_TAG .
+        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
           
       - name: Configure AWS Credentials
         if: env.BRANCH != 'prod' 
@@ -106,13 +106,13 @@ jobs:
         env:          
           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${{inputs.ECR_REPO}}:$IMAGE_TAG $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
-          docker push $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
+          docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+          docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
           
       - name: Vulnerabilities
         env:          
           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
-        run: trivy image $ECR_URL/${{inputs.ECR_REPO}}:$IMAGE_TAG
+        run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
       
       - name: Update Image tag
         run: |
