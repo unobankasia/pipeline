@@ -123,6 +123,6 @@ jobs:
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git checkout -b $IMAGE_TAG
           git push -u origin $IMAGE_TAG
-          gh pr create --fill
+          gh pr create --fill -B dev
           sleep 10
           gh pr merge -sd --admin
