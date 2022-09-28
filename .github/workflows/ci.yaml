@@ -125,4 +125,4 @@ jobs:
           git push -u origin $IMAGE_TAG
           gh pr create --fill
           sleep 10
-          gh pr merge -sd 
+          gh pr merge -sd --admin
