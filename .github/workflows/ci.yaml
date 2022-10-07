@@ -116,13 +116,13 @@ jobs:
       
       - name: Update Image tag
         run: |
-          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
+          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git -b migration
           cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git push -u origin $IMAGE_TAG
-          gh pr create --fill
+          gh pr create --fill -B migration
           sleep 10
           gh pr merge -sd 
