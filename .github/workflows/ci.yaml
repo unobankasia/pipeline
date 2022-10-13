@@ -48,7 +48,7 @@ jobs:
       - name: Setup Tag for image and branch
         run: |
           echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-          echo "BRANCH=$(echo GITHUB_REF##*/ | rev | cut -c7- | rev)" >> $GITHUB_ENV
+          echo "BRANCH=$(echo $GITHUB_REF##*/ | rev | cut -c7- | rev)" >> $GITHUB_ENV
                
       - name: Maven Build  
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
