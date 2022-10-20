@@ -58,7 +58,7 @@ jobs:
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
-        uses: unobankasia/sonarqube-action-1@v1.2.1
+        uses: unobankasia/sonarqube-action@v1.1.7
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
