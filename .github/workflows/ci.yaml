@@ -78,6 +78,7 @@ jobs:
       
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
+        working-directory: ${{inputs.BUILD_PATH}}
           
       - name: Configure AWS Credentials
         if: env.BRANCH != 'prod' 
