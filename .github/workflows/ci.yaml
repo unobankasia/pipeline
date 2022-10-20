@@ -21,7 +21,10 @@ on:
       JAVA_HOME:
         type: string        
       MAVEN_HOME:
-        type: string      
+        type: string
+      SONAR_DIR:
+        default: './'
+        type: string
     
 env:
   ## Sets environment variable
@@ -59,7 +62,7 @@ jobs:
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
+          projectBaseDir: ${{inputs.SONAR_DIR}}
           projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
