@@ -75,7 +75,7 @@ jobs:
          scanMetadataReportFile: .scannerwork/report-task.txt
       
       - name: Docker Build  
-        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
+        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG . --no-cache
           
       - name: Configure AWS Credentials
         if: env.BRANCH != 'prod' 
