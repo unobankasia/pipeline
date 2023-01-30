@@ -47,6 +47,7 @@ jobs:
           
                
       - name: Maven Build
+        if: env.BRANCH == 'crm-sit'
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=sit-maven-releases -Dsnapshot-repo=sit-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
         working-directory: ${{inputs.BUILD_PATH}}
         
