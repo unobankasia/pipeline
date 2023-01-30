@@ -45,6 +45,12 @@ jobs:
           whispers ${{ github.workspace }} > whispers.txt
           .github/workflows/scripts/whispers.sh  
 
+      - name: Setup Tag for image and branch
+        run: |
+          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
