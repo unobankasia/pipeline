@@ -75,11 +75,11 @@ jobs:
         uses: unobankasia/sonarqube-action-1@v1.2.1
         with:
          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
-          projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
-          exclusions: ${{inputs.EXCLUDED_CLASS}}
+         login: ${{ secrets.SONARQUBE_TOKEN }}
+         projectBaseDir: ./
+         projectKey: ${{inputs.MICROSERVICES}}
+         binaries: target/classes
+         exclusions: ${{inputs.EXCLUDED_CLASS}}
       
       - name: SonarQube Quality Gate check
         continue-on-error: true
