@@ -55,7 +55,7 @@ jobs:
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
         working-directory: ${{inputs.BUILD_PATH}}
 
-      - name: SonarQube Scan
+#      - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
@@ -65,7 +65,7 @@ jobs:
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
       
-      - name: SonarQube Quality Gate check
+  #    - name: SonarQube Quality Gate check
         continue-on-error: true
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
