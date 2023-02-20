@@ -72,22 +72,22 @@ jobs:
         working-directory: ${{inputs.BUILD_PATH}}
 
    #   - name: SonarQube Scan
-        uses: unobankasia/sonarqube-action-1@v1.2.1
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
-          projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
-          exclusions: ${{inputs.EXCLUDED_CLASS}}
+   #     uses: unobankasia/sonarqube-action-1@v1.2.1
+   #     with:
+   #       host: ${{ secrets.SONARQUBE_HOST }}
+   #       login: ${{ secrets.SONARQUBE_TOKEN }}
+   #       projectBaseDir: ./
+   #       projectKey: ${{inputs.MICROSERVICES}}
+   #       binaries: target/classes
+   #       exclusions: ${{inputs.EXCLUDED_CLASS}}
       
 #      - name: SonarQube Quality Gate check
-        continue-on-error: true
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-        with:
-         scanMetadataReportFile: .scannerwork/report-task.txt
+#        continue-on-error: true
+#        uses: sonarsource/sonarqube-quality-gate-action@master
+#        timeout-minutes: 5
+#        env:
+#         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+#        with:
+ #        scanMetadataReportFile: .scannerwork/report-task.txt
       
       
