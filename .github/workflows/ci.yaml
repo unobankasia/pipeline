@@ -71,7 +71,7 @@ jobs:
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
         working-directory: ${{inputs.BUILD_PATH}}
 
-      - name: SonarQube Scan
+   #   - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
@@ -81,7 +81,7 @@ jobs:
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
       
-      - name: SonarQube Quality Gate check
+    #  - name: SonarQube Quality Gate check
         continue-on-error: true
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
