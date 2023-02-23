@@ -53,22 +53,22 @@ jobs:
                
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
         working-directory: ${{inputs.BUILD_PATH}}
               
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'sit') }}
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=sit-maven-releases -Dsnapshot-repo=sit-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=sit-maven-releases -Dsnapshot-repo=sit-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'uat') }}
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=uat-maven-releases -Dsnapshot-repo=uat-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=uat-maven-releases -Dsnapshot-repo=uat-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
         working-directory: ${{inputs.BUILD_PATH}}
         
       - name: Maven Build
-        if: ${{ contains(env.BRANCH, 'prod') }}
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=https://nexus.dev.ph.unobank.asia/repository/ -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=admin -Dartifactory-password=25abd83a-d558-45bd-8fe0-c3bee99dd608
+        if: ${{ contains(env.BRANCH, 'prod') }}       
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_PROD }} -Drelease-repo=maven-releases -Dsnapshot-repo=maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_PROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_PROD }}
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
