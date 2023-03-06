@@ -30,7 +30,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  CI:
+  build:
     # The type of runner that the job will run on
     runs-on: self-hosted
 
@@ -131,7 +131,12 @@ jobs:
 #         env:          
 #           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
 #         run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-      
+
+  merge:          
+    runs-on: self-hosted
+    needs: [build]
+    if: success()
+    steps:
       - name: Update Image tag
         run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git -b merge
