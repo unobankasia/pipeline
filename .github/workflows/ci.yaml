@@ -137,8 +137,12 @@ jobs:
     needs: [build]
     if: success()
     steps:    
-      - uses: actions/checkout@v3
-      
+      - name: Setup Tag for image and branch
+        run: |
+          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV   
+       
       - name: Update Image tag
         run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git -b merge
