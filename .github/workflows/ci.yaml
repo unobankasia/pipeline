@@ -136,7 +136,9 @@ jobs:
     runs-on: self-hosted
     needs: [build]
     if: success()
-    steps:
+    steps:    
+      - uses: actions/checkout@v3
+      
       - name: Update Image tag
         run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git -b merge
