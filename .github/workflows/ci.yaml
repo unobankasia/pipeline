@@ -44,8 +44,8 @@ jobs:
          
       - name: Setup Tag for image and branch
         run: |
-          export PREV_COMMIT=${git rev-parse HEAD^1}
-          echo "IMAGE_TAG=$(echo $PREV_COMMIT | cut -c 1-6)" >> $GITHUB_ENV
+          export PREV_SHA=$(git rev-parse ${GITHUB_SHA}^1)
+          echo "IMAGE_TAG=$(echo $PREV_SHA | cut -c 1-6)" >> $GITHUB_ENV
           #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV           
      
