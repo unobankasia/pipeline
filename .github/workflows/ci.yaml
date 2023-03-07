@@ -38,16 +38,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      
-     
- 
-         
-      - name: Setup Tag for image and branch
-        run: |
-          export PREV_SHA=$(git rev-parse ${GITHUB_SHA}^1)
-          echo "IMAGE_TAG=$(echo $PREV_SHA | cut -c 1-6)" >> $GITHUB_ENV
-          #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
-          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV           
+
      
       - name: Update Image tag
         run: |
