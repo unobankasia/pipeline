@@ -72,7 +72,7 @@ jobs:
         
       - name: Create ECR repository
         continue-on-error: true
-        run: aws ecr create-repository --repository-name crm-ops360-composite-api --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ap-southeast-1
+        run: aws ecr create-repository --repository-name crm-ops360-composite-api --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
         
       - name: Build, tag, and push image to Amazon ECR
         env:          
