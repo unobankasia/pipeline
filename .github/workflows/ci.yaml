@@ -39,6 +39,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       
+      - name: Setup Tag for image and branch
+        run: |
+          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG . --no-cache
           
