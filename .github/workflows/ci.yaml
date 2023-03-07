@@ -132,26 +132,4 @@ jobs:
 #           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
 #         run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
 
-  merge:          
-    runs-on: self-hosted
-    needs: [build]
-    if: success()
-    steps:    
-      - name: Setup Tag for image and branch
-        run: |
-          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-          #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
-          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV   
-       
-      - name: Update Image tag
-        run: |
-          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git -b merge
-          cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
-          git checkout -b $IMAGE_TAG
-          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
-          git add values.yaml
-          git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
-          git push -u origin $IMAGE_TAG
-          gh pr create --fill -B merge
-          sleep 10
-          gh pr merge -sd --admin
+
