@@ -59,7 +59,7 @@ jobs:
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
+          projectBaseDir: ./${{inputs.BUILD_PATH}}
           projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
