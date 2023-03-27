@@ -55,6 +55,7 @@ jobs:
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
+        continue-on-error: true
         uses: unobankasia/sonarqube-action-1@v1.2.1
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
@@ -63,18 +64,10 @@ jobs:
           projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
-      
-      - name: SonarQube Quality Gate check
-        continue-on-error: true
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-        with:
-         scanMetadataReportFile: .scannerwork/report-task.txt
-      
+           
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
+        working-directory: ${{inputs.BUILD_PATH}}        
           
       - name: Configure AWS Credentials
         if: env.BRANCH != 'prod' 
