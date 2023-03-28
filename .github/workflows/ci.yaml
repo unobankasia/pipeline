@@ -59,9 +59,9 @@ jobs:
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./${{inputs.BUILD_PATH}}/
+          projectBaseDir: ./
           projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
+          binaries: ${{inputs.BUILD_PATH}}/target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
           
       # - name: Docker Build  
