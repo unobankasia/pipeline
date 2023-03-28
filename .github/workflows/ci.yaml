@@ -55,23 +55,23 @@ jobs:
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
         working-directory: ${{inputs.BUILD_PATH}}
 
-      - name: SonarQube Scan
-        continue-on-error: true
-        uses: unobankasia/sonarqube-action-1@v1.2.1
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./${{inputs.BUILD_PATH}}
-          projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
-          exclusions: ${{inputs.EXCLUDED_CLASS}}
+  #    - name: SonarQube Scan
+  #      continue-on-error: true
+  #      uses: unobankasia/sonarqube-action-1@v1.2.1
+  #      with:
+  #        host: ${{ secrets.SONARQUBE_HOST }}
+  #        login: ${{ secrets.SONARQUBE_TOKEN }}
+  #        projectBaseDir: ./${{inputs.BUILD_PATH}}
+  #        projectKey: ${{inputs.MICROSERVICES}}
+  #        binaries: target/classes
+  #        exclusions: ${{inputs.EXCLUDED_CLASS}}
            
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
         working-directory: ${{inputs.BUILD_PATH}}        
           
       - name: Configure AWS Credentials
-        if: env.BRANCH != 'prod' 
+        if: ${{ !contains(env.BRANCH, 'prod') }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
          aws-region: ${{inputs.REGION}}
@@ -80,7 +80,7 @@ jobs:
          role-skip-session-tagging: true
               
       - name: Configure AWS Credentials (PROD)
-        if: env.BRANCH == 'prod'
+        if: ${{ contains(env.BRANCH, 'prod') }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
          aws-region: ${{inputs.REGION}}
@@ -116,7 +116,22 @@ jobs:
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
-          git push -u origin $IMAGE_TAG
-          gh pr create --fill
-          sleep 10
-          gh pr merge -sd --admin
+      
+      - name: PR Merge
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            cd terraform-pipeline-test
+            git push -u origin $IMAGE_TAG
+            gh pr create --fill
+            sleep 2
+            gh pr merge -dr --admin 
+          new_command_on_retry:
+            cd terraform-pipeline-test
+            git pull
+            git push -u origin $IMAGE_TAG
+            gh pr create --fill
+            sleep 2
+            gh pr merge -dr --admin 
