@@ -114,7 +114,7 @@ jobs:
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
-          git pull
+          git pull origin $IMAGE_TAG
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
       
       - name: PR Merge
