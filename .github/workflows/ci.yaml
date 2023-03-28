@@ -110,7 +110,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
-          max_attempts: 3
+          max_attempts: 5
           command: |
             git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
             cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
@@ -129,7 +129,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
-          max_attempts: 3
+          max_attempts: 5
           command: |
             cd ${{inputs.PLATFORM_REPO}}
             gh pr create --fill
