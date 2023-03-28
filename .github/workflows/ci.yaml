@@ -126,8 +126,8 @@ jobs:
             git push -u origin $IMAGE_TAG
             gh pr create --fill
             sleep 2
-            gh pr merge -dr --admin 
-          new_command_on_retry:
+            gh pr merge -sd --admin 
+          new_command_on_retry: |
             cd ${{inputs.PLATFORM_REPO}}
             git pull
             git push -u origin $IMAGE_TAG
