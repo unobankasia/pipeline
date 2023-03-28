@@ -123,13 +123,13 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: |
-            cd terraform-pipeline-test
+            cd ${{inputs.PLATFORM_REPO}}
             git push -u origin $IMAGE_TAG
             gh pr create --fill
             sleep 2
             gh pr merge -dr --admin 
           new_command_on_retry:
-            cd terraform-pipeline-test
+            cd ${{inputs.PLATFORM_REPO}}
             git pull
             git push -u origin $IMAGE_TAG
             gh pr create --fill
