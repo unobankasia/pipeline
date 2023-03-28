@@ -115,7 +115,8 @@ jobs:
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
-      
+          git push -u origin $IMAGE_TAG
+          
       - name: PR Merge
         uses: nick-fields/retry@v2
         with:
@@ -123,15 +124,11 @@ jobs:
           max_attempts: 3
           command: |
             cd ${{inputs.PLATFORM_REPO}}
-            git push -u origin $IMAGE_TAG
             gh pr create --fill
             sleep 2
             gh pr merge -sd --admin 
           new_command_on_retry: |
             cd ${{inputs.PLATFORM_REPO}}
-            git pull origin main
-            git pull origin $IMAGE_TAG
-            git push -u origin $IMAGE_TAG
             gh pr create --fill
             sleep 2
             gh pr merge -dr --admin 
