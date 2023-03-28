@@ -114,7 +114,6 @@ jobs:
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
-          git pull origin $IMAGE_TAG
           git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
       
       - name: PR Merge
@@ -131,6 +130,7 @@ jobs:
           new_command_on_retry: |
             cd ${{inputs.PLATFORM_REPO}}
             git pull origin main
+            git pull origin $IMAGE_TAG
             git push -u origin $IMAGE_TAG
             gh pr create --fill
             sleep 2
