@@ -77,7 +77,7 @@ jobs:
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
           
       - name: Configure AWS Credentials
-        if: env.BRANCH != 'prod' 
+        if: ${{ !contains(env.BRANCH, 'prod') }} 
         uses: aws-actions/configure-aws-credentials@v1
         with:
          aws-region: ${{inputs.REGION}}
@@ -86,7 +86,7 @@ jobs:
          role-skip-session-tagging: true
               
       - name: Configure AWS Credentials (PROD)
-        if: env.BRANCH == 'prod'
+        if: ${{ contains(env.BRANCH, 'prod') }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
          aws-region: ${{inputs.REGION}}
