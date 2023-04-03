@@ -123,13 +123,12 @@ jobs:
             cd ${{inputs.PLATFORM_REPO}}
             git pull origin $IMAGE_TAG
             git push -u origin $IMAGE_TAG
-            
-          
+                   
       - name: PR Merge
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
-          max_attempts: 5
+          max_attempts: 8
           command: |
             cd ${{inputs.PLATFORM_REPO}}
             gh pr create --fill
