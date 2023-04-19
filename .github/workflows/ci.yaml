@@ -127,14 +127,7 @@ jobs:
             sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
             git add values.yaml
             git commit -m "${{env.BRANCH}} | outbound | ${{env.IMAGE_TAG}}"
-            git push -u origin $IMAGE_TAG
-            git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
-            cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/outbound1
-            git checkout -b testing
-            sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
-            git add values.yaml
-            git commit -m "${{env.BRANCH}} | outbound1 | ${{env.IMAGE_TAG}}"
-            git push -u origin $IMAGE_TAG            
+            git push -u origin $IMAGE_TAG          
           new_command_on_retry: |
             cd ${{inputs.PLATFORM_REPO}}
             git pull origin $IMAGE_TAG
@@ -155,3 +148,37 @@ jobs:
             gh pr create --fill
             sleep 2
             gh pr merge -dr --admin 
+            
+      - name: Update Image tag 2
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 5
+          command: |
+            git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
+            cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/outbound1
+            git checkout -b $IMAGE_TAG
+            sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
+            git add values.yaml
+            git commit -m "${{env.BRANCH}} | outbound1 | ${{env.IMAGE_TAG}}"
+            git push -u origin $IMAGE_TAG          
+          new_command_on_retry: |
+            cd ${{inputs.PLATFORM_REPO}}
+            git pull origin $IMAGE_TAG
+            git push -u origin $IMAGE_TAG
+                   
+      - name: PR Merge 2
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 8
+          command: |
+            cd ${{inputs.PLATFORM_REPO}}
+            gh pr create --fill
+            sleep 2
+            gh pr merge -sd --admin 
+          new_command_on_retry: |
+            cd ${{inputs.PLATFORM_REPO}}
+            gh pr create --fill
+            sleep 2
+            gh pr merge -dr --admin             
