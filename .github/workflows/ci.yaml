@@ -56,8 +56,6 @@ jobs:
 
       - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
-        env:
-         SONAR_VERBOSE: "true"
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
@@ -65,6 +63,8 @@ jobs:
           projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
+          extraProperties: |
+            sonar.verbose=true
       
       - name: SonarQube Quality Gate check
         continue-on-error: true
