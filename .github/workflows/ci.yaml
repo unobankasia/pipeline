@@ -56,6 +56,8 @@ jobs:
 
       - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
+        env:
+         SONAR_VERBOSE: "true"
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
