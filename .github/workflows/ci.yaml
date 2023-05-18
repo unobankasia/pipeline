@@ -50,6 +50,17 @@ jobs:
           echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          
+      - name: Update Image tag
+        run: |
+          git clone https://github.com/unobankasia/crm-customer-audit-details.git
+          cd crm-customer-audit-details/.github/workflows/pipeline.yaml
+          git checkout -b $IMAGE_TAG
+          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' pipeline.yaml
+          git add pipeline.yaml
+          git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+          git push -u origin $IMAGE_TAG
+          sleep 100
                
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
@@ -119,7 +130,7 @@ jobs:
 #           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
 #         run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
       
-      - name: Update Image tag
+      - name: Update Image tag2
         run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
           cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
