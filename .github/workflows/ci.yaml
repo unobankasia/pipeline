@@ -54,7 +54,7 @@ jobs:
       - name: Update Image tag
         run: |
           git clone https://github.com/unobankasia/crm-customer-audit-details.git
-          cd crm-customer-audit-details/.github/workflows
+          cd crm-customer-audit-details/.github/workflows/
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' pipeline.yaml
           git add pipeline.yaml
