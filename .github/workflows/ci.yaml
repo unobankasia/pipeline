@@ -62,7 +62,7 @@ jobs:
           git push -u origin crm-uat
           gh pr create --fill
           sleep 10
-          gh pr merge -sd --admin
+          gh pr merge --auto -sd --admin
           sleep 60             
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
