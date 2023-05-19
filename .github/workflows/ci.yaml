@@ -58,7 +58,10 @@ jobs:
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
           git commit -m "updated with ${{env.IMAGE_TAG}}"
-          git push -u origin crm-dev
+          git push -u origin $IMAGE_TAG
+          gh pr create --fill
+          sleep 10
+          gh pr merge -sd --admin
           sleep 60             
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
