@@ -50,18 +50,16 @@ jobs:
           echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           #echo "BRANCH=$(echo ${GITHUB_REF##*/} | rev | cut -c7- | rev)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          
       - name: Update Image tag
-        run: |
+        run: |          
           git clone https://github.com/unobankasia/crm-customer-audit-details.git
-          cd crm-customer-audit-details/.github/workflows/
-          git checkout -b $IMAGE_TAG
-          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' pipeline.yaml
-          git add pipeline.yaml
-          git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
-          git push -u origin $IMAGE_TAG
-          sleep 100
-               
+          cd crm-customer-audit-details
+          git checkout crm-dev
+          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
+          git add values.yaml
+          git commit -m "updated with ${{env.IMAGE_TAG}}"
+          git push -u origin crm-dev
+          sleep 60             
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
