@@ -55,7 +55,7 @@ jobs:
         run: |          
           git clone https://github.com/unobankasia/crm-customer-audit-details.git
           cd crm-customer-audit-details
-          git checkout $IMAGE_TAG
+          git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
           git commit -m "updated with ${{env.IMAGE_TAG}}"
