@@ -58,9 +58,6 @@ jobs:
           git add values.yaml
           git commit -m "updated with echo "${{env.IMAGE_TAG}}""
           git push -u
-          gh pr create --fill
-          sleep 4
-          gh pr merge -sd --admin
           
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
