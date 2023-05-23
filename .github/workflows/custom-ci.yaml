@@ -65,14 +65,14 @@ jobs:
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
       
-      - name: SonarQube Quality Gate check
-        continue-on-error: true
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-        with:
-         scanMetadataReportFile: .scannerwork/report-task.txt
+#       - name: SonarQube Quality Gate check
+#         continue-on-error: true
+#         uses: sonarsource/sonarqube-quality-gate-action@master
+#         timeout-minutes: 5
+#         env:
+#          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+#         with:
+#          scanMetadataReportFile: .scannerwork/report-task.txt
       
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
