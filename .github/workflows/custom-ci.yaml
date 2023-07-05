@@ -122,7 +122,7 @@ jobs:
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
-          git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+          git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git push -u origin $IMAGE_TAG
           gh pr create --fill
           sleep 10
