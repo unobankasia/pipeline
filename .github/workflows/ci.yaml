@@ -113,7 +113,7 @@ jobs:
         env:          
           ECR_URL: ${{ steps.login-ecr.outputs.registry }}
         run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-          --timeout 10m
+#          --timeout 10m
       
       - name: Update Image tag
         run: |
