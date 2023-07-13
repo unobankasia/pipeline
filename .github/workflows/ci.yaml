@@ -6,7 +6,7 @@ on:
     inputs:
       REGION:
         type: string        
-      MICROSERVICES:
+      MICROSERVICES: 
         type: string         
       ASSUME_ROLE:
         type: string         
