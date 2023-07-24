@@ -135,7 +135,7 @@ jobs:
         env:          
            ECR_URL: ${{ steps.login-ecr.outputs.registry }}
         run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-             sh """trivy image --format template --template "@/home/ubuntu/template/html.tpl" -o cve_report.html {Service}:${GIT_COMMIT_REV}"""
+     #        sh """trivy image --format template --template "@/home/ubuntu/template/html.tpl" -o cve_report.html {Service}:${GIT_COMMIT_REV}"""
       
       - name: Update Image tag
         run: |
