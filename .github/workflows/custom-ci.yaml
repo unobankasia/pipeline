@@ -120,7 +120,7 @@ jobs:
       - name: Update Image tag
         run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
-          cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
+          cd ${{inputs.PLATFORM_REPO}}/envs/custom-dev/03-applications/${{inputs.MICROSERVICES}}
           git checkout -b $IMAGE_TAG
           sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
           git add values.yaml
