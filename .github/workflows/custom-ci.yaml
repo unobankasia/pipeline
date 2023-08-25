@@ -125,5 +125,5 @@ jobs:
           git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git push -u origin $IMAGE_TAG
           gh pr create --fill
-          sleep 10
+          sleep 2
           gh pr merge -sd --admin
