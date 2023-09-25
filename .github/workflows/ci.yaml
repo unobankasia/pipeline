@@ -63,16 +63,7 @@ jobs:
           projectKey: ${{inputs.MICROSERVICES}}
           binaries: target/classes
           exclusions: ${{inputs.EXCLUDED_CLASS}}
-      
-      - name: SonarQube Quality Gate check
-        continue-on-error: true
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-        with:
-         scanMetadataReportFile: .scannerwork/report-task.txt
-      
+            
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
           
@@ -125,5 +116,5 @@ jobs:
           git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
           git push -u origin $IMAGE_TAG
           gh pr create --fill
-          sleep 10
+          sleep 3
           gh pr merge -sd --admin
