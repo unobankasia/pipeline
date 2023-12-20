@@ -53,7 +53,7 @@ jobs:
           echo "$GITHUB_ENV"
                
       - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=dev
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
