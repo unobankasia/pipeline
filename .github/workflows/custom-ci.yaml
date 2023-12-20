@@ -21,11 +21,14 @@ on:
       JAVA_HOME:
         type: string        
       MAVEN_HOME:
-        type: string      
+        type: string 
+      ENV:
+        type: string
     
 env:
   ## Sets environment variable
   JAVA_HOME: ${{inputs.JAVA_HOME}}
+  ENV: ${{inputs.PROFILE}}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -53,7 +56,7 @@ jobs:
           echo "$GITHUB_ENV"
                
       - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=dev
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=${{inputs.PROFILE}}
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
