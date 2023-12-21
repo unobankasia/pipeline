@@ -26,7 +26,6 @@ on:
 env:
   ## Sets environment variable
   JAVA_HOME: ${{inputs.JAVA_HOME}}
-  PROFILE: ${{inputs.PROFILE}}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -56,11 +55,7 @@ jobs:
         run: |
           echo "IMAGE_TAG=custom-${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "BRANCH=custom-${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-          echo "$GITHUB_ENV"
-          echo "${{inputs.PROFILE}}"
-          echo "${{inputs.MICROSERVICES}}"
-   
+          echo "$GITHUB_ENV"   
                
       - name: Maven Build  
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=${{steps.extract_branch.outputs.branch}}
