@@ -23,7 +23,7 @@ on:
       MAVEN_HOME:
         type: string 
       ENV:
-        type: string
+        type: string 
     
 env:
   ## Sets environment variable
@@ -54,9 +54,11 @@ jobs:
           echo "BRANCH=custom-${GITHUB_REF##*/}" >> $GITHUB_ENV
 
           echo "$GITHUB_ENV"
+          echo "${{inputs.ENV}}"
+   
                
       - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=${{inputs.PROFILE}}
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package -Denv=${{inputs.ENV}}
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
