@@ -55,6 +55,7 @@ jobs:
 
           echo "$GITHUB_ENV"
           echo "${{inputs.PROFILE}}"
+          echo "${{inputs.MICROSERVICES}}"
    
                
       - name: Maven Build  
