@@ -49,6 +49,7 @@ jobs:
         run: |
           echo "IMAGE_TAG=custom-${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "BRANCH=custom-${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "${GITHUB_REF##*/}"
                
       - name: Maven Build  
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
@@ -74,56 +75,57 @@ jobs:
 #         with:
 #          scanMetadataReportFile: .scannerwork/report-task.txt
       
-      - name: Docker Build  
-        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
-          
-      - name: Configure AWS Credentials
-        if: ${{ !contains(env.BRANCH, 'prod') }}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-         aws-region: ${{inputs.REGION}}
-         role-to-assume: ${{inputs.ASSUME_ROLE}}
-         role-duration-seconds: 3600
-         role-skip-session-tagging: true
+      #- name: Docker Build  
+      #  run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
+      #    
+      #- name: Configure AWS Credentials
+      #  if: ${{ !contains(env.BRANCH, 'prod') }}
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #   aws-region: ${{inputs.REGION}}
+      #   role-to-assume: ${{inputs.ASSUME_ROLE}}
+      #   role-duration-seconds: 3600
+      #   role-skip-session-tagging: true
               
-      - name: Configure AWS Credentials (PROD)
-        if: ${{ contains(env.BRANCH, 'prod') }}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-         aws-region: ${{inputs.REGION}}
-         role-to-assume: ${{inputs.ASSUME_ROLE_PROD}}
-         role-duration-seconds: 3600
-         role-skip-session-tagging: true
+      #- name: Configure AWS Credentials (PROD)
+      #  if: ${{ contains(env.BRANCH, 'prod') }}
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #   aws-region: ${{inputs.REGION}}
+      #   role-to-assume: ${{inputs.ASSUME_ROLE_PROD}}
+      #   role-duration-seconds: 3600
+      #   role-skip-session-tagging: true
           
-      - name: Login to Amazon ECR 
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      #- name: Login to Amazon ECR 
+      #  id: login-ecr
+      #  uses: aws-actions/amazon-ecr-login@v1
         
-      - name: Create ECR repository
-        continue-on-error: true
-        run: aws ecr create-repository --repository-name ${{inputs.MICROSERVICES}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
+      #- name: Create ECR repository
+      #  continue-on-error: true
+      #  run: aws ecr create-repository --repository-name ${{inputs.MICROSERVICES}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
         
-      - name: Build, tag, and push image to Amazon ECR
-        env:          
-          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-          docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+      #- name: Build, tag, and push image to Amazon ECR
+      #  env:          
+      #    ECR_URL: ${{ steps.login-ecr.outputs.registry }}
+      #  run: |
+      #    docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+      #    docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
           
       # - name: Vulnerabilities
       #   env:          
       #     ECR_URL: ${{ steps.login-ecr.outputs.registry }}
       #   run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+
       
-      - name: Update Image tag
-        run: |
-          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
-          cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
-          git checkout -b $IMAGE_TAG
-          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
-          git add values.yaml
-          git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
-          git push -u origin $IMAGE_TAG
-          gh pr create --fill
-          sleep 2
-          gh pr merge -sd --admin
+ #     - name: Update Image tag
+ #       run: |
+ #         git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
+ #         cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
+ #         git checkout -b $IMAGE_TAG
+ #         sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
+ #         git add values.yaml
+ #         git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+ #         git push -u origin $IMAGE_TAG
+ #         gh pr create --fill
+ #         sleep 2
+ #         gh pr merge -sd --admin
