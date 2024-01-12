@@ -52,7 +52,9 @@ jobs:
           echo "${GITHUB_REF##*/}"
                
       - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
+        run: |
+          ${{inputs.MAVEN_HOME}}/bin/mvn clean package
+          ls -l
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
