@@ -54,6 +54,14 @@ jobs:
         run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
         working-directory: ${{inputs.BUILD_PATH}}
 
+        env:
+          TZ: Asia/Manila  # Set the timezone here
+
+
+      - name: Set Maven Timezone
+        run: |
+          echo "export MAVEN_OPTS='-Duser.timezone=$TZ'" >> $GITHUB_ENV
+
       - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
         with:
