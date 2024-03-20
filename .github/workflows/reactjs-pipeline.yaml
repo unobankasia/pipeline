@@ -62,15 +62,15 @@ jobs:
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
                
 
-      - name: SonarQube Scan
-        uses: unobankasia/sonarqube-action-1@v1.2.1
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
-          projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
-          exclusions: ${{inputs.EXCLUDED_CLASS}}
+      # - name: SonarQube Scan
+      #   uses: unobankasia/sonarqube-action-1@v1.2.1
+      #   with:
+      #     host: ${{ secrets.SONARQUBE_HOST }}
+      #     login: ${{ secrets.SONARQUBE_TOKEN }}
+      #     projectBaseDir: ./
+      #     projectKey: ${{inputs.MICROSERVICES}}
+      #     binaries: target/classes
+      #     exclusions: ${{inputs.EXCLUDED_CLASS}}
             
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
