@@ -78,9 +78,10 @@ jobs:
       - name: Configure AWS Credentials
         if: ${{ !contains(env.BRANCH, 'prod') }} 
         uses: aws-actions/configure-aws-credentials@v1
+        
         with:
-         aws-region: ${{inputs.REGION}}
-         role-to-assume: ${{inputs.ASSUME_ROLE}}
+         aws-region: "ap-southeast-1"
+         role-to-assume: "arn:aws:iam::325910447219:role/cross-account-role-iexceed"
          role-duration-seconds: 3600
          role-skip-session-tagging: true
               
