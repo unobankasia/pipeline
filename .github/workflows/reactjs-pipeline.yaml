@@ -1,122 +1,80 @@
-name: Template-CI
+name: ReactJS Pipeline
 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  workflow_call:
-    inputs:
-      REGION:
-        type: string        
-      MICROSERVICES:
-        type: string         
-      ASSUME_ROLE:
-        type: string         
-      ASSUME_ROLE_PROD:
-        type: string         
-      EXCLUDED_CLASS:
-        type: string                
-      PLATFORM_REPO:
-        type: string        
-      BUILD_PATH:
-        type: string         
-      NODE_HOME:  # Change this to NODE_HOME for React.js
-        type: string  # Assuming you need to specify the Node.js home directory         
-      MAVEN_HOME:
-        type: string      
-    
-env:
-  ## Sets environment variable
-  NODE_HOME: ${{ inputs.NODE_HOME }}  # Change here to NODE_HOME
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  push:
+    branches: 
+      - lam-dev
+      - lam-sit
+  pull_request:
+    types: [closed]
+    branches: 
+      - lam-uat
+      - lam-prodpush
+      
 jobs:
-  # This workflow contains a single job called "build"
-  CI:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: self-hosted
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-
-      # Use Node.js 18.x
-      - name: Use Node.js 18.x
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        
+      - name: Use Node.js 14.x
         uses: actions/setup-node@v2
         with:
-          node-version: 18.x
-          node-path: ${{ inputs.NODE_HOME }}/bin/node
-
-      # Install dependencies and build
+          node-version: 14.x
+       # Install dependencies and build
       - name: Install Dependencies and Build
         run: |
           npm install --force
           npm run build
       
-      - name: Run scanner for the repository
-        continue-on-error: true
-        run: |
-          whispers ${{ github.workspace }} > whispers.txt
-          .github/workflows/scripts/whispers.sh  
-          
+      - name: SonarQube Scan
+        uses: unobankasia/sonarqube-action-1@v1.2.1
+        with:
+          host: ${{ secrets.SONARQUBE_HOST }}
+          login: ${{ secrets.SONARQUBE_TOKEN }}
+          projectBaseDir: ./
+          # Adjust other parameters as needed
+	
       - name: Setup Tag for image and branch
         run: |
           echo "IMAGE_TAG=${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-               
-
-      # - name: SonarQube Scan
-      #   uses: unobankasia/sonarqube-action-1@v1.2.1
-      #   with:
-      #     host: ${{ secrets.SONARQUBE_HOST }}
-      #     login: ${{ secrets.SONARQUBE_TOKEN }}
-      #     projectBaseDir: ./
-      #     projectKey: ${{inputs.MICROSERVICES}}
-      #     binaries: target/classes
-      #     exclusions: ${{inputs.EXCLUDED_CLASS}}
-            
-      - name: Docker Build  
-        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
-          
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV	
+        
+      - name: Docker Build
+        run: docker build -t my-react-app .
+      
       - name: Configure AWS Credentials
-        if: ${{ !contains(env.BRANCH, 'prod') }} 
         uses: aws-actions/configure-aws-credentials@v1
         with:
-         aws-region: ${{inputs.REGION}}
-         role-to-assume: ${{inputs.ASSUME_ROLE}}
-         role-duration-seconds: 3600
-         role-skip-session-tagging: true
-              
-      - name: Configure AWS Credentials (PROD)
-        if: ${{ contains(env.BRANCH, 'prod') }}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-         aws-region: ${{inputs.REGION}}
-         role-to-assume: ${{inputs.ASSUME_ROLE_PROD}}
-         role-duration-seconds: 3600
-         role-skip-session-tagging: true
-          
-      - name: Login to Amazon ECR 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "ap-southeast-1"
+      
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        
+      
       - name: Create ECR repository
-        continue-on-error: true
-        run: aws ecr create-repository --repository-name ${{inputs.MICROSERVICES}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
-        
+        run: aws ecr create-repository --repository-name my-react-app --region "ap-southeast-1"
+      
       - name: Build, tag, and push image to Amazon ECR
-        env:          
-          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-          docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-          
+          docker tag my-react-app:latest $ECR_REGISTRY/my-react-app:latest
+          docker push $ECR_REGISTRY/my-react-app:latest
+      
       - name: Vulnerabilities
-        env:          
-          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
-        run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-#          --timeout 10m
+        run: trivy image my-react-app:latest  # Adjust this based on your vulnerability scanning tool
       
       - name: Update Image tag
         run: |
+          # Implement script to update image tag in deployment configuration
+          # Example: sed -i 's/image: .*/image: "$ECR_REGISTRY\/my-react-app:latest"/' deployment.yaml
+          run: |
           git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
           cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
           git checkout -b $IMAGE_TAG
@@ -127,3 +85,4 @@ jobs:
           gh pr create --fill
           sleep 3
           gh pr merge -sd --admin
+      # Additional steps if needed
