@@ -32,13 +32,24 @@ jobs:
   # This workflow contains a single job called "build"
   CI:
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      # Use Node.js 18.x
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      # Install dependencies and build
+      - name: Install Dependencies and Build
+        run: |
+          npm install --force
+          npm run build
+      
       - name: Run scanner for the repository
         continue-on-error: true
         run: |
@@ -50,19 +61,16 @@ jobs:
           echo "IMAGE_TAG=${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
                
-      - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
-        working-directory: ${{inputs.BUILD_PATH}}
 
-      - name: SonarQube Scan
-        uses: unobankasia/sonarqube-action-1@v1.2.1
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectBaseDir: ./
-          projectKey: ${{inputs.MICROSERVICES}}
-          binaries: target/classes
-          exclusions: ${{inputs.EXCLUDED_CLASS}}
+      # - name: SonarQube Scan
+      #   uses: unobankasia/sonarqube-action-1@v1.2.1
+      #   with:
+      #     host: ${{ secrets.SONARQUBE_HOST }}
+      #     login: ${{ secrets.SONARQUBE_TOKEN }}
+      #     projectBaseDir: ./
+      #     projectKey: ${{inputs.MICROSERVICES}}
+      #     binaries: target/classes
+      #     exclusions: ${{inputs.EXCLUDED_CLASS}}
             
       - name: Docker Build  
         run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
