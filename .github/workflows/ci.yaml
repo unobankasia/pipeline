@@ -53,7 +53,7 @@ jobs:
                
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy -U -s settings.xml  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean deploy  -Dunobank-artifactory-url=${{ secrets.NEXUS_URL_NONPROD }} -Drelease-repo=dev-maven-releases -Dsnapshot-repo=dev-maven-snapshots -Dartifactory-username=${{ secrets.NEXUS_USERNAME_NONPROD }} -Dartifactory-password=${{ secrets.NEXUS_PASSWORD_NONPROD }}
         working-directory: ${{inputs.BUILD_PATH}}
               
       - name: Maven Build
