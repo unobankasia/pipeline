@@ -151,4 +151,3 @@ jobs:
           gh pr create --fill
           sleep 2
           gh pr merge -sd --admin
-      
