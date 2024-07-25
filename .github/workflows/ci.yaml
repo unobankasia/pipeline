@@ -48,7 +48,7 @@ jobs:
       - name: Setup Tag for image and branch
         run: |
           echo "IMAGE_TAG=crm-${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-          echo "BRANCH=crm-${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
                
       - name: Maven Build
         if: ${{ contains(env.BRANCH, 'dev') }}
