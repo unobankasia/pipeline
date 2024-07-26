@@ -47,7 +47,7 @@ jobs:
           
       - name: Setup Tag for image and branch
         run: |
-          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           
       - name: Maven Build  
@@ -126,7 +126,7 @@ jobs:
             git checkout -b $IMAGE_TAG
             sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
             git add values.yaml
-            git commit -m "${{env.BRANCH}} | ${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+            git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
             git push -u origin $IMAGE_TAG
           new_command_on_retry: |
             cd ${{inputs.PLATFORM_REPO}}
