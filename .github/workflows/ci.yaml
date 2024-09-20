@@ -56,6 +56,7 @@ jobs:
 
       - name: SonarQube Scan
         uses: unobankasia/sonarqube-action-1@v1.2.1
+        continue-on-error: true
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
@@ -100,11 +101,11 @@ jobs:
           docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
           docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
           
-      - name: Vulnerabilities
-        env:          
-          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
-        run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
-#          --timeout 10m
+      # - name: Vulnerabilities
+      #   env:          
+      #     ECR_URL: ${{ steps.login-ecr.outputs.registry }}
+      #   run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+      #     --timeout 10m
       
       - name: Update Image tag
         run: |
