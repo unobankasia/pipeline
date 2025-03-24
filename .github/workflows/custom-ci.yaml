@@ -39,6 +39,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: Bump version and push tag
+        run: |
+          VERSION=$(date +%Y.%m.%d)
+          git tag -a "v$VERSION" -m "Release $VERSION"
+          git push origin "v$VERSION"
+
       - name: Run scanner for the repository
         continue-on-error: true
         run: |
