@@ -47,6 +47,7 @@ jobs:
       # Install dependencies and build
       - name: Install Dependencies and Build
         run: |
+          npm cache clean --force
           npm install --force
           npm run build
       
