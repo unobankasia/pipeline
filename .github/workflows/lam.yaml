@@ -1,0 +1,131 @@
+
+name: Template-CI
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  workflow_call:
+    inputs:
+      REGION:
+        type: string        
+      MICROSERVICES:
+        type: string         
+      ASSUME_ROLE:
+        type: string         
+      ASSUME_ROLE_PROD:
+        type: string         
+      EXCLUDED_CLASS:
+        type: string                
+      PLATFORM_REPO:
+        type: string        
+      BUILD_PATH:
+        type: string         
+      JAVA_HOME:
+        type: string        
+      MAVEN_HOME:
+        type: string      
+    
+env:
+  ## Sets environment variable
+  JAVA_HOME: ${{inputs.JAVA_HOME}}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  CI:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Use Node.js 18.x
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      # Install dependencies and build
+      - name: Install Dependencies and Build
+        run: |
+          npm cache clean --force
+          npm install --force
+          npm run build
+      
+      - name: Run scanner for the repository
+        continue-on-error: true
+        run: |
+          whispers ${{ github.workspace }} > whispers.txt
+          .github/workflows/scripts/whispers.sh  
+          
+      - name: Setup Tag for image and branch
+        run: |
+          echo "IMAGE_TAG=${GITHUB_REF##*/}-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+               
+
+      # - name: SonarQube Scan
+      #   uses: unobankasia/sonarqube-action-1@v1.2.1
+      #   with:
+      #     host: ${{ secrets.SONARQUBE_HOST }}
+      #     login: ${{ secrets.SONARQUBE_TOKEN }}
+      #     projectBaseDir: ./
+      #     projectKey: ${{inputs.MICROSERVICES}}
+      #     binaries: target/classes
+      #     exclusions: ${{inputs.EXCLUDED_CLASS}}
+            
+      - name: Docker Build  
+        run: docker build -t ${{inputs.MICROSERVICES}}:$IMAGE_TAG .
+          
+      - name: Configure AWS Credentials
+        if: ${{ !contains(env.BRANCH, 'prod') }} 
+        uses: aws-actions/configure-aws-credentials@v1
+        
+        with:
+         aws-region: "ap-southeast-1"
+         role-to-assume: "arn:aws:iam::325910447219:role/cross-account-role-iexceed"
+         role-duration-seconds: 3600
+         role-skip-session-tagging: true
+              
+      - name: Configure AWS Credentials (PROD)
+        if: ${{ contains(env.BRANCH, 'prod') }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+         aws-region: ${{inputs.REGION}}
+         role-to-assume: ${{inputs.ASSUME_ROLE_PROD}}
+         role-duration-seconds: 3600
+         role-skip-session-tagging: true
+          
+      - name: Login to Amazon ECR 
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Create ECR repository
+        continue-on-error: true
+        run: aws ecr create-repository --repository-name ${{inputs.MICROSERVICES}} --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true --encryption-configuration encryptionType=KMS --region ${{inputs.REGION}}
+        
+      - name: Build, tag, and push image to Amazon ECR
+        env:          
+          ECR_URL: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker tag ${{inputs.MICROSERVICES}}:$IMAGE_TAG $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+          docker push $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+          
+      # - name: Vulnerabilities
+      #   env:          
+      #     ECR_URL: ${{ steps.login-ecr.outputs.registry }}
+      #   run: trivy image $ECR_URL/${{inputs.MICROSERVICES}}:$IMAGE_TAG
+      #     --timeout 10m
+      
+      - name: Update Image tag
+        run: |
+          git clone https://${{secrets.GIT_TOKEN}}@github.com/unobankasia/${{inputs.PLATFORM_REPO}}.git
+          cd ${{inputs.PLATFORM_REPO}}/envs/${{env.BRANCH}}/03-applications/${{inputs.MICROSERVICES}}
+          git checkout -b $IMAGE_TAG
+          sed -i 's/tag.*/tag: "${{env.IMAGE_TAG}}"/' values.yaml
+          git add values.yaml
+          git commit -m "${{inputs.MICROSERVICES}} | ${{env.IMAGE_TAG}}"
+          git push -u origin $IMAGE_TAG
+          gh pr create --fill
+          sleep 3
+          gh pr merge -sd --admin
