@@ -51,7 +51,7 @@ jobs:
           echo "BRANCH=custom-${GITHUB_REF##*/}" >> $GITHUB_ENV
                
       - name: Maven Build  
-        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package
+        run: ${{inputs.MAVEN_HOME}}/bin/mvn clean package spring-boot:repackage
         working-directory: ${{inputs.BUILD_PATH}}
 
       - name: SonarQube Scan
